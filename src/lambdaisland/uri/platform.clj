@@ -10,7 +10,7 @@
   (Integer/parseInt hex 16))
 
 (defn byte->hex [byte]
-  (format "%X" byte))
+  (format "%02X" byte))
 
 (defn char-code-at [str pos]
   (long (.charAt str pos)))
