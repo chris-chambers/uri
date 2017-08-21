@@ -85,8 +85,7 @@
 
 (defn- merge-paths [a b]
   (if (some #{\/} a)
-    (str (re-find #?(:clj #"\A.*/"
-                     :cljs #"^.*/") a) b)
+    (str (re-find #"^.*/" a) b)
     (if (absolute-path? b)
       b
       (str "/" b))))
