@@ -4,8 +4,7 @@
   :license {:name "Mozilla Public License 2.0"
             :url "https://www.mozilla.org/en-US/MPL/2.0/"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/data.json "0.2.6"]
-                 ]
+                 [org.clojure/data.json "0.2.6"]]
   :plugins [[lein-codox "0.10.3"]
             [lein-doo "0.1.7"]
             [lein-cljsbuild "1.1.5"]
@@ -25,5 +24,4 @@
   :profiles {:dev
              {:dependencies [[org.clojure/clojurescript "1.9.562"]
                              [com.cemerick/piggieback "0.2.1"]
-                             [lein-doo "0.1.7"]
-                             ]}})
+                             [lein-doo "0.1.7"]]}})
