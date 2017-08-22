@@ -1,18 +1,14 @@
 (ns lambdaisland.uri-test
-  #?@(:clj
-      [(:require
-        [clojure.test :as t :refer [are deftest is testing]]
-        [lambdaisland.uri :as uri])
-       (:import lambdaisland.uri.URI)]
-      :cljs
-      [(:require [lambdaisland.uri :as uri]
-                 [cljs.test :refer-macros [deftest is testing are]])]))
+  (:require [clojure.test :refer [deftest is testing are]]
+            [lambdaisland.uri :as uri])
+  #?@(:clj [(:import lambdaisland.uri.URI)]
+      :cljs []))
 
 (deftest parsing
   (testing "happy path"
     (are [x y] (= y (uri/parse x))
       "http://user:password@example.com:8080/path?query=value#fragment"
-      (uri/URI. "http" "user" "password" "example.com" "8080" "/path" "query=value" "fragment")
+      (uri/URI. "http" "user" "password" "example.com" 8080 "/path" "query=value" "fragment")
 
       "/happy/path"
       (uri/URI. nil nil nil nil nil "/happy/path" nil nil)
@@ -91,7 +87,7 @@
       (is (= (:user parsed)) "usr")
       (is (= (:password parsed)) "pwd")
       (is (= (:host parsed)) "example.com")
-      (is (= (:port parsed)) "8080")
+      (is (= (:port parsed)) 8080)
       (is (= (:path parsed)) "/path")
       (is (= (:query parsed)) "query=value")
       (is (= (:fragment parsed)) "fragment"))
@@ -100,7 +96,7 @@
       (is (= (parsed :user)) "usr")
       (is (= (parsed :password)) "pwd")
       (is (= (parsed :host)) "example.com")
-      (is (= (parsed :port)) "8080")
+      (is (= (parsed :port)) 8080)
       (is (= (parsed :path)) "/path")
       (is (= (parsed :query)) "query=value")
       (is (= (parsed :fragment)) "fragment"))

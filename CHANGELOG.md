@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. This change
 - BREAKING: An empty path is now parsed as `""` instead of `nil`. This is per
   RFC3986: "A path is always defined for a URI, though the defined path may be
   empty (zero length).", it also mimics the behaviour of Addressable::URI.
+- BREAKING: The port number is now parsed as a long/integer rather than a string.
 
 ## [1.1.0] - 2017-04-25
 ### Added

@@ -14,3 +14,6 @@
 
 (defn char-code-at [str pos]
   (long (.charAt str pos)))
+
+(defn string->long [str]
+  (Long/parseLong str))

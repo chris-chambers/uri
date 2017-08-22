@@ -23,3 +23,6 @@
 
 (defn char-code-at [str pos]
   (.charCodeAt str pos))
+
+(defn string->long [str]
+  (js/parseInt str 10))

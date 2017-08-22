@@ -1,7 +1,7 @@
 (ns lambdaisland.uri
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [lambdaisland.uri.platform :refer [string->long]])
   #?(:clj (:import clojure.lang.IFn)))
-
 
 (def uri-regex #?(:clj #"\A(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)?(\?([^#]*))?(#(.*))?\z"
                   :cljs #"^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)?(\?([^#]*))?(#(.*))?$"))
@@ -48,7 +48,8 @@
   (let [[scheme authority path query fragment] (match-uri uri)
         path (if (nil? path) "" path)]
     (if authority
-      (let [[user password host port] (match-authority authority)]
+      (let [[user password host port] (match-authority authority)
+            port (if-not (nil? port) (string->long port))]
         (URI. scheme user password host port path query fragment))
       (URI. scheme nil nil nil nil path query fragment))))
 
