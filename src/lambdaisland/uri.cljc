@@ -1,5 +1,6 @@
 (ns lambdaisland.uri
   (:require [clojure.string :as str]
+            [lambdaisland.uri.normalize :as normalize]
             [lambdaisland.uri.platform :refer [string->long]])
   #?(:clj (:import clojure.lang.IFn)))
 
@@ -69,23 +70,6 @@
 (defn- absolute-path? [path]
   (= (first path) \/))
 
-(defn- remove-dot-segments
-  "As per RFC 3986 section 5.2.4"
-  [path]
-  (if (seq path)
-    (loop [in (str/split path #"(?=/)")
-           out []]
-      (case (first in)
-        "/." (if (next in)
-               (recur (next in) out)
-               (recur nil (conj out "/")))
-        "/.." (if (next in)
-                (recur (next in) (vec (butlast out)))
-                (recur nil (conj (vec (butlast out)) "/")))
-        nil (str/join out)
-        (recur (next in) (conj out (first in)))))
-    ""))
-
 (defn- merge-paths [a b]
   (if (some #{\/} a)
     (str (re-find #"^.*/" a) b)
@@ -97,14 +81,14 @@
   "Join two URI records as per RFC 3986. Handles relative URIs."
   [base ref]
   (if (:scheme ref)
-    (update ref :path remove-dot-segments)
+    (update ref :path normalize/remove-dot-segments)
     (-> (if (:host ref)
           (assoc ref
                  :scheme (:scheme base)
                  :query  (:query ref))
           (if (seq (:path ref))
             (assoc base :path
-                   (remove-dot-segments
+                   (normalize/remove-dot-segments
                     (if (absolute-path? (:path ref))
                       (:path ref)
                       (merge-paths (:path base) (:path ref))))

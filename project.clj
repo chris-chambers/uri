@@ -24,4 +24,6 @@
   :profiles {:dev
              {:dependencies [[org.clojure/clojurescript "1.9.562"]
                              [com.cemerick/piggieback "0.2.1"]
-                             [lein-doo "0.1.7"]]}})
+                             [lein-doo "0.1.7"]
+                             [org.clojure/test.check "0.9.0"]
+                             [zweikopf "1.0.2"]]}})

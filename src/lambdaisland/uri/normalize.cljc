@@ -83,17 +83,44 @@
                        (drop 1)
                        (map hex->byte))))))
 
+(defn remove-dot-segments
+  "As per RFC 3986 section 5.2.4"
+  [path]
+  (if (seq path)
+    (loop [in (str/split path #"(?=/)")
+           out []]
+      (case (first in)
+        "/." (if (next in)
+               (recur (next in) out)
+               (recur nil (conj out "/")))
+        "/.." (if (next in)
+                (recur (next in) (vec (butlast out)))
+                (recur nil (conj (vec (butlast out)) "/")))
+        nil (str/join out)
+        "." ""
+        (recur (next in) (conj out (first in)))))
+    ""))
+
 (defn normalize-path [path]
-  (when-not (nil? path)
-    (percent-encode (percent-decode path) :path)))
+  (if (seq path)
+    (-> path
+        percent-decode
+        (percent-encode :path)
+        remove-dot-segments)
+    ""))
 
 (defn normalize-query [query]
-  (when-not (nil? query)
+  (when (seq query)
     (percent-encode (percent-decode query) :query)))
+
+(defn normalize-fragment [fragment]
+  (when (seq fragment)
+    fragment))
 
 (defn normalize
   "Normalize a lambdaisland.uri.URI."
   [uri]
   (-> uri
       (update :path normalize-path)
-      (update :query normalize-query)))
+      (update :query normalize-query)
+      (update :fragment normalize-fragment)))
