@@ -45,7 +45,8 @@
 (defn parse
   "Parse a URI string into a lambadisland.uri.URI record."
   [uri]
-  (let [[scheme authority path query fragment] (match-uri uri)]
+  (let [[scheme authority path query fragment] (match-uri uri)
+        path (if (nil? path) "" path)]
     (if authority
       (let [[user password host port] (match-authority authority)]
         (URI. scheme user password host port path query fragment))
@@ -70,7 +71,7 @@
 (defn- remove-dot-segments
   "As per RFC 3986 section 5.2.4"
   [path]
-  (when path
+  (if (seq path)
     (loop [in (str/split path #"(?=/)")
            out []]
       (case (first in)
@@ -81,7 +82,8 @@
                 (recur (next in) (vec (butlast out)))
                 (recur nil (conj (vec (butlast out)) "/")))
         nil (str/join out)
-        (recur (next in) (conj out (first in)))))))
+        (recur (next in) (conj out (first in)))))
+    ""))
 
 (defn- merge-paths [a b]
   (if (some #{\/} a)
@@ -99,14 +101,14 @@
           (assoc ref
                  :scheme (:scheme base)
                  :query  (:query ref))
-          (if (nil? (:path ref))
-            (assoc base :query (some :query [ref base]))
+          (if (seq (:path ref))
             (assoc base :path
                    (remove-dot-segments
                     (if (absolute-path? (:path ref))
                       (:path ref)
                       (merge-paths (:path base) (:path ref))))
-                   :query (:query ref))))
+                   :query (:query ref))
+            (assoc base :query (some :query [ref base]))))
         (assoc :fragment (:fragment ref)))))
 
 (defn join

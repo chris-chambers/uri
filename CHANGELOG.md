@@ -7,10 +7,14 @@ All notable changes to this project will be documented in this file. This change
 <!-- ### Removed -->
 <!-- ### Fixed -->
 
-
 ## [Unreleased]
 ### Added
 - `lambdaisland.uri.normalize/normalize`, for normalizing URI instances.
+
+### Changed
+- BREAKING: An empty path is now parsed as `""` instead of `nil`. This is per
+  RFC3986: "A path is always defined for a URI, though the defined path may be
+  empty (zero length).", it also mimics the behaviour of Addressable::URI.
 
 ## [1.1.0] - 2017-04-25
 ### Added
