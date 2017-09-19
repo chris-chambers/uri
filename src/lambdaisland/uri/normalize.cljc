@@ -1,7 +1,7 @@
 (ns lambdaisland.uri.normalize
   (:require [clojure.string :as str]
-            [lambdaisland.uri.platform :refer [byte-seq->string
-                                               string->byte-seq
+            [lambdaisland.uri.platform :refer [utf8-byte-seq->string
+                                               string->utf8-byte-seq
                                                byte->hex hex->byte
                                                char-code-at]]))
 
@@ -23,7 +23,8 @@
         host       (str unreserved sub-delims "\\[:\\]")
         authority  pchar
         path       (str pchar "\\/")
-        query      (str pchar "\\/\\?")
+        query      (str (str/replace pchar #";" "") ;; Mimic Addressable::URI, not standard
+                        "\\/\\?")
         fragment   (str pchar "\\/\\?")]
     {:alpha      (re-pattern (str "[^" alpha "]"))
      :digit      (re-pattern (str "[^" digit "]"))
@@ -56,12 +57,9 @@
   "Convert characters in their percent encoded form. e.g.
    `(percent_encode \"a\") #_=> \"%61\"`. When given a second argument, then
    only characters of the given character class are encoded,
-   see `character-class`.
-
-   Characters are encoded as UTF-8. To use a different encoding. re-bind
-   `*character-encoding*`"
+   see `character-class`."
   ([component]
-   (->> (string->byte-seq component)
+   (->> (string->utf8-byte-seq component)
         (map #(str "%" (byte->hex %)))
         (apply str)))
   ([component type]
@@ -73,12 +71,11 @@
 
 (defn percent-decode
   "The inverse of `percent-encode`, convert any %XX sequences in a string to
-   characters. Byte sequences are interpreted as UTF-8. To use a different
-   encoding. re-bind `*character-encoding*`"
+   characters. Byte sequences are interpreted as UTF-8."
   [s]
   (str/replace s #"(%[0-9A-Fa-f]{2})+"
                (fn [[x _]]
-                 (byte-seq->string
+                 (utf8-byte-seq->string
                   (->> (str/split x #"%")
                        (drop 1)
                        (map hex->byte))))))
@@ -101,12 +98,19 @@
         (recur (next in) (conj out (first in)))))
     ""))
 
+(defn normalize-scheme [scheme]
+  (some-> scheme str/lower-case))
+
+(defn normalize-host [host]
+  (some-> host str/lower-case))
+
 (defn normalize-path [path]
   (if (seq path)
     (-> path
         percent-decode
         (percent-encode :path)
-        remove-dot-segments)
+        remove-dot-segments
+        (str/replace #"^\.\.?/?" "")) ;; Addressable::URI RULE_2D
     ""))
 
 (defn normalize-query [query]
@@ -115,12 +119,14 @@
 
 (defn normalize-fragment [fragment]
   (when (seq fragment)
-    fragment))
+    (percent-encode (percent-decode fragment) :fragment)))
 
 (defn normalize
   "Normalize a lambdaisland.uri.URI."
   [uri]
   (-> uri
+      (update :scheme normalize-scheme)
+      (update :host normalize-host)
       (update :path normalize-path)
       (update :query normalize-query)
       (update :fragment normalize-fragment)))

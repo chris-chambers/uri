@@ -1,7 +1,12 @@
 (ns lambdaisland.uri.normalize-test
   (:require [lambdaisland.uri :as uri]
             [lambdaisland.uri.normalize :as n]
-            [clojure.test :refer [deftest testing is are]]))
+            [clojure.test :refer [deftest testing is are]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.clojure-test #?(:clj :refer
+                                                :cljs :refer-macros) [defspec]]
+            [clojure.test.check.properties #?(:clj :refer
+                                              :cljs :refer-macros) [for-all]]))
 
 
 (deftest normalize-test
@@ -14,6 +19,7 @@
   (are [x y] (= (-> x n/normalize str) y)
     (uri/map->URI {:query "x=y"}) "?x=y"
     (uri/map->URI {:query "x=?y#"}) "?x=?y%23"))
+
 
 (deftest normalize-path-test
   (are [x y] (= (n/normalize-path x) y)
@@ -32,3 +38,30 @@
   (are [in out] (= (n/percent-decode in) out)
     "%61%62%63" "abc"
     "%F0%9F%99%88%F0%9F%99%89" "🙈🙉"))
+
+(defspec percent-encode-round-trip-test
+  (for-all [s gen/string]
+    (= (n/percent-decode (n/percent-encode s)) s)))
+
+(defspec percent-encode-consistency-test
+  (for-all [s gen/string]
+    (re-find #"^(%[0-9A-F]{2})*$" (n/percent-encode s))))
+
+(defspec normalize-idempotence-test
+  (for-all [s gen/string]
+    (= (-> s
+           uri/parse
+           n/normalize)
+       (-> s
+           uri/parse
+           n/normalize
+           n/normalize))))
+
+(defspec reverse-uppercase-test
+  (for-all [s gen/string]
+    (= (-> s
+           clojure.string/upper-case
+           clojure.string/reverse)
+       (-> s
+           clojure.string/reverse
+           clojure.string/upper-case))))

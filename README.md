@@ -104,6 +104,9 @@ This library implements the algorithm specified in [Section 5.2](https://tools.i
 
 It has been tested against [this list of test cases compiled by the W3C](https://www.w3.org/2004/04/uri-rel-test.html).
 
+IRIs (Internationalized Resource Identifiers) are defined in [RFC3987 Internationalized Resource Identifiers (IRIs)](https://www.ietf.org/rfc/rfc3987.txt).
+
+
 ## License
 
 Copyright © 2017 Arne Brasseur

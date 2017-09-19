@@ -1,9 +1,9 @@
 (ns lambdaisland.uri.platform)
 
-(defn string->byte-seq [s]
+(defn string->utf8-byte-seq [s]
   (.getBytes s "UTF8"))
 
-(defn byte-seq->string [arr]
+(defn utf8-byte-seq->string [arr]
   (String. (byte-array arr) "UTF8"))
 
 (defn hex->byte [hex]

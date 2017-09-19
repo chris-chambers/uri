@@ -1,10 +1,10 @@
 (ns lambdaisland.uri.platform
   (:require [goog.crypt :as c]))
 
-(defn string->byte-seq [s]
+(defn string->utf8-byte-seq [s]
   (c/stringToUtf8ByteArray s))
 
-(defn byte-seq->string [arr]
+(defn utf8-byte-seq->string [arr]
   (c/utf8ByteArrayToString (apply array arr)))
 
 (defn hex->byte [hex]
